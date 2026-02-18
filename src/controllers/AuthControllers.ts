@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { db } from "../../db";
 import { users } from "../schema";
@@ -9,6 +9,11 @@ import { eq } from "drizzle-orm";
 export async function register(req: Request, res: Response) {
   try {
     const { name, email, password } = req.body;
+// Debug logs 
+
+console.log("DB:", db); 
+console.log("Users table:", users);
+
 
     // check if user exists
     const existing = await db.select().from(users).where(eq(users.email, email));
@@ -51,7 +56,7 @@ export async function login(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
 
-    // find user
+    // find user by email
     const result = await db.select().from(users).where(eq(users.email, email));
     const user = result[0];
     if (!user) {
@@ -81,3 +86,27 @@ export async function login(req: Request, res: Response) {
     res.status(500).json({ message: error.message });
   }
 }
+
+// LOGOUT
+export const logout = (req: Request, res: Response) => {
+  if (req.session) {
+    req.session.destroy((error: any) => {
+      if (error) {
+        return res.status(500).json({ message: "Logout failed" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
+  } else {
+    res.json({ message: "No active session" });
+  }
+};
+
+// VERIFY EMAIL
+export const verifyEmail = (req: Request, res: Response) => {
+  res.send("Email verification endpoint");
+};
+
+// RESET PASSWORD
+export const resetPassword = (req: Request, res: Response) => {
+  res.send("Password reset endpoint");
+};

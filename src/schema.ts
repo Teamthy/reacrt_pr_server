@@ -1,7 +1,8 @@
 import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
-export const thumbnails = pgTable("thumbnails", {
+export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  title: varchar("title", { length: 255 }).notNull(),
-  imageUrl: varchar("image_url", { length: 500 }).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  password: varchar("password", { length: 255 }).notNull(),
 });

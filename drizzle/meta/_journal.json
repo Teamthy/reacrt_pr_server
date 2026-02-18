@@ -15,6 +15,13 @@
       "when": 1771342131566,
       "tag": "0001_handy_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771443434501,
+      "tag": "0002_easy_scarecrow",
+      "breakpoints": true
     }
   ]
 }

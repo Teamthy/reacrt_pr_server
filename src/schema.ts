@@ -1,8 +1,7 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar } from "drizzle-orm/pg-core";
 
 export const thumbnails = pgTable("thumbnails", {
   id: serial("id").primaryKey(),
-  title: text("title").notNull(),
-  imageUrl: text("image_url").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  title: varchar("title", { length: 255 }).notNull(),
+  imageUrl: varchar("image_url", { length: 500 }).notNull(),
 });

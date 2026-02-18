@@ -8,6 +8,13 @@
       "when": 1771312162243,
       "tag": "0000_open_omega_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1771342131566,
+      "tag": "0001_handy_the_watchers",
+      "breakpoints": true
     }
   ]
 }

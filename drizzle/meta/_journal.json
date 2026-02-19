@@ -5,22 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1771312162243,
-      "tag": "0000_open_omega_sentinel",
+      "when": 1771461349679,
+      "tag": "0000_clever_clea",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1771342131566,
-      "tag": "0001_handy_the_watchers",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1771443434501,
-      "tag": "0002_easy_scarecrow",
+      "when": 1771462024329,
+      "tag": "0001_aspiring_la_nuit",
       "breakpoints": true
     }
   ]

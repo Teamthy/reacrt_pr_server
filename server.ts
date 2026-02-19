@@ -8,6 +8,7 @@ import { sql, eq } from "drizzle-orm";
 import usersRouter from "./src/routes/users";
 import authRouter from "./src/routes/AuthRoutes";
 const app = express();
+const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use("/api/users", usersRouter);

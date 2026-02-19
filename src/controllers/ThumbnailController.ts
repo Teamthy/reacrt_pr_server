@@ -2,9 +2,6 @@ import { Request, Response } from "express";
 import { db } from "../../db";
 import { thumbnails } from "../schema";
 import { eq } from "drizzle-orm";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 // Create a new thumbnail
 export const createThumbnail = async (req: Request, res: Response) => {
@@ -91,12 +88,13 @@ export const deleteThumbnail = async (req: Request, res: Response) => {
   }
 };
 
-// Generate thumbnail using Gemini (creates DB record, generates text preview, updates record)
+// Generate thumbnail (image-only; no text preview generation)
 export const generateThumbnail = async (req: Request, res: Response) => {
   try {
     const { userId, title, user_prompt, style, aspect_ratio, color_scheme, text_overlay } = req.body;
     if (!title || !userId) return res.status(400).json({ message: "Title and userId are required" });
 
+    // create DB record and mark as generating
     const [thumbRecord] = await db.insert(thumbnails).values({
       userId,
       title,
@@ -108,60 +106,21 @@ export const generateThumbnail = async (req: Request, res: Response) => {
       isGenerating: true,
     }).returning();
 
-    const geminiPrompt = `Generate a creative thumbnail image description based on the following specifications:
-Title: ${title}
-Style: ${style || "modern"}
-Aspect Ratio: ${aspect_ratio || "16:9"}
-Color Scheme: ${color_scheme || "vibrant"}
-Text Overlay: ${text_overlay ? "Yes, include text" : "No text overlay"}
-User Additional Details: ${user_prompt || "None"}
-
-Please provide a detailed description that could be used to generate this thumbnail image.`;
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: geminiPrompt }] }],
-      generationConfig: { maxOutputTokens: 512, temperature: 0.7 },
-    });
-
-    const preview = result.response.text();
-
-    await db.update(thumbnails).set({ isGenerating: false, prompt_used: preview }).where(eq(thumbnails.id, thumbRecord.id));
-
-    // Placeholder image generation logic (replace with real image generation + storage)
+    // --- Image generation logic (placeholder) ---
+    // Replace this block with your real image generation + storage logic.
+    // Example: call an image-generation API, upload the image to S3, get the URL.
     const generatedImageUrl = "https://via.placeholder.com/300x169.png?text=Generated+Thumbnail";
-    await db.update(thumbnails).set({ image_url: generatedImageUrl }).where(eq(thumbnails.id, thumbRecord.id));
+    // --------------------------------------------
 
-    res.json({ success: true, data: { ...thumbRecord, prompt_used: preview, image_url: generatedImageUrl } });
+    // update DB record with image URL and mark generation complete
+    await db.update(thumbnails)
+      .set({ image_url: generatedImageUrl, isGenerating: false })
+      .where(eq(thumbnails.id, thumbRecord.id));
+
+    // return the updated record data
+    const updated = { ...thumbRecord, prompt_used: user_prompt || "", image_url: generatedImageUrl, isGenerating: false };
+    res.json({ success: true, data: updated });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Generate thumbnail preview (text-only description)
-export const generateThumbnailPreview = async (req: Request, res: Response) => {
-  try {
-    const { title, style, aspect_ratio, color_scheme, user_prompt, text_overlay } = req.body;
-    if (!title) return res.status(400).json({ message: "Title is required" });
-
-    const geminiPrompt = `Generate a creative thumbnail image description for:
-Title: ${title}
-Style: ${style || "modern"}
-Aspect Ratio: ${aspect_ratio || "16:9"}
-Color Scheme: ${color_scheme || "vibrant"}
-Text Overlay: ${text_overlay ? "Yes" : "No"}
-Additional Details: ${user_prompt || "None"}`;
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: geminiPrompt }] }],
-      generationConfig: { maxOutputTokens: 512, temperature: 0.7 },
-    });
-
-    const preview = result.response.text();
-    res.json({ success: true, preview });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
-  }
-};
-

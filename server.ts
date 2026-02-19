@@ -9,11 +9,18 @@ import usersRouter from "./src/routes/users";
 import authRouter from "./src/routes/AuthRoutes";
 const app = express();
 const PORT = process.env.PORT || 5000;
+const allowed = [process.env.FRONTEND_ORIGIN || "http://localhost:5173"]; 
+app.use(cors({ origin: allowed }));
 app.use(cors());
 app.use(express.json());
 app.use("/api/users", usersRouter);
 
-// Serve React frontend
+if (process.env.NODE_ENV === "production") { 
+    app.use(express.static("client/dist")); // adjust path for your build 
+    app.get("*", (req, res) => res.sendFile(path.resolve("client/dist/index.html"))); }
+
+ 
+    
 app.use(express.static(path.join(__dirname, "../public")));
 
 app.get("/", (req, res) => {

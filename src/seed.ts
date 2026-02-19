@@ -20,9 +20,9 @@ async function seed() {
       },
     ]);
 
-    console.log("✅ Seed data inserted successfully");
+    console.log(" Seed data inserted successfully");
   } catch (err) {
-    console.error("❌ Error inserting seed data:", err);
+    console.error(" Error inserting seed data:", err);
   }
 }
 

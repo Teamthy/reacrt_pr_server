@@ -1,4 +1,4 @@
-import { pgTable, serial, integer, varchar, text, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, integer, varchar, text, boolean, timestamp, uuid } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -7,17 +7,17 @@ export const users = pgTable("users", {
   password: varchar("password", { length: 255 }).notNull(),
 });
 
-export const thumbnails = pgTable("thumbnails", {
-  id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id),
-  title: varchar("title", { length: 255 }).notNull(),
-  prompt_used: text("prompt_used"),
-  style: varchar("style", { length: 50 }).default("modern"),
-  aspect_ratio: varchar("aspect_ratio", { length: 20 }).default("16:9"),
-  color_scheme: varchar("color_scheme", { length: 50 }).default("vibrant"),
-  text_overlay: boolean("text_overlay").default(false),
-  image_url: varchar("image_url", { length: 500 }),
-  isGenerating: boolean("is_generating").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+export const thumbnails = pgTable("thumbnails", { 
+  id: uuid("id").defaultRandom().primaryKey(), 
+  userId: uuid("user_id"), // maps to DB column user_id (uuid) 
+  title: text("title"), 
+  prompt_used: text("prompt_used"), 
+  style: text("style"), 
+  aspect_ratio: text("aspect_ratio"), 
+  color_scheme: text("color_scheme"), 
+  text_overlay: text("text_overlay"), 
+  image_url: text("image_url"), 
+  isGenerating: boolean("is_generating"), 
+  createdAt: timestamp("created_at", { mode: "utc" }), 
+  updatedAt: timestamp("updated_at", { mode: "utc" }), 
 });

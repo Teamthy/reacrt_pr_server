@@ -13,7 +13,11 @@ const allowed = [process.env.FRONTEND_ORIGIN || "http://localhost:5173"];
 app.use(cors({ origin: allowed }));
 app.use(cors());
 app.use(express.json());
-app.use("/api/users", usersRouter);
+app.use('/', usersRouter);
+app.get('/health', (req, res) => {
+  res.send('OK');
+});
+
 
 if (process.env.NODE_ENV === "production") { 
     app.use(express.static("client/dist")); // adjust path for your build 
@@ -109,6 +113,16 @@ app.delete("/thumbnails/:id", async (req, res) => {
 });
 
 const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+
+import listEndpoints from 'express-list-endpoints'; 
+
+console.log('Registered routes:'); 
+const endpoints = listEndpoints(app); 
+endpoints.forEach((ep) => { 
+  const methods = ep.methods.join(',').toUpperCase(); 
+  console.log(`${methods} ${ep.path}`);
+}); 
+
+app.listen(process.env.PORT || 5000, () => { 
+  console.log(`Server running at http://localhost:${process.env.PORT || 5000}`);
 });

@@ -13,6 +13,12 @@ const allowed = [process.env.FRONTEND_ORIGIN || "http://localhost:5173"];
 app.use(cors({ origin: allowed }));
 app.use(cors());
 app.use(express.json());
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => { 
+  if (err && err.type === "entity.parse.failed") { 
+    return res.status(400).json({ success: false, message: "Invalid JSON in request body" }); 
+  } 
+  next(err); 
+});
 app.use('/', usersRouter);
 app.get('/health', (req, res) => {
   res.send('OK');

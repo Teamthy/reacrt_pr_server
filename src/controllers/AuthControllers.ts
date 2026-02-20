@@ -9,11 +9,11 @@ import { eq } from "drizzle-orm";
 export async function register(req: Request, res: Response) {
   try {
     const { name, email, password } = req.body;
-// Debug logs 
 
-console.log("DB:", db); 
-console.log("Users table:", users);
-
+    // Basic validation
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
     // check if user exists
     const existing = await db.select().from(users).where(eq(users.email, email));
@@ -34,20 +34,25 @@ console.log("Users table:", users);
     const newUser = result[0];
 
     // issue JWT
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not set");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+
     const token = jwt.sign(
       { id: newUser.id, email: newUser.email },
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registered successfully",
       user: { id: newUser.id, name: newUser.name, email: newUser.email },
       token,
     });
   } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    console.error("Register error:", error);
+    return res.status(500).json({ message: error?.message || "Internal server error" });
   }
 }
 
@@ -55,6 +60,10 @@ console.log("Users table:", users);
 export async function login(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
     // find user by email
     const result = await db.select().from(users).where(eq(users.email, email));
@@ -69,6 +78,11 @@ export async function login(req: Request, res: Response) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not set");
+      return res.status(500).json({ message: "Server configuration error" });
+    }
+
     // issue JWT
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -76,14 +90,14 @@ export async function login(req: Request, res: Response) {
       { expiresIn: "1h" }
     );
 
-    res.json({
+    return res.json({
       message: "Login successful",
       user: { id: user.id, name: user.name, email: user.email },
       token,
     });
   } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: error.message });
+    console.error("Login error:", error);
+    return res.status(500).json({ message: error?.message || "Internal server error" });
   }
 }
 
@@ -94,19 +108,19 @@ export const logout = (req: Request, res: Response) => {
       if (error) {
         return res.status(500).json({ message: "Logout failed" });
       }
-      res.json({ message: "Logged out successfully" });
+      return res.json({ message: "Logged out successfully" });
     });
   } else {
-    res.json({ message: "No active session" });
+    return res.json({ message: "No active session" });
   }
 };
 
 // VERIFY EMAIL
 export const verifyEmail = (req: Request, res: Response) => {
-  res.send("Email verification endpoint");
+  return res.json({ message: "Email verification endpoint" });
 };
 
 // RESET PASSWORD
 export const resetPassword = (req: Request, res: Response) => {
-  res.send("Password reset endpoint");
+  return res.json({ message: "Password reset endpoint" });
 };
